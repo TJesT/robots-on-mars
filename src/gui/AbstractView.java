@@ -1,2 +1,4 @@
-package gui;public class AbstractView {
+package gui;
+
+public class AbstractView {
 }
