@@ -1,2 +1,10 @@
-package engine.item;public class Bomb {
+package engine.item;
+
+import engine.robot.AbstractRobot;
+
+public class Bomb extends AbstractItem {
+    @Override
+    void use(AbstractRobot robot) {
+
+    }
 }

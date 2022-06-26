@@ -1,40 +1,35 @@
-package engine.surface.map;
+package engine.surface;
 
 import engine.surface.exception.NoSuchElementException;
+import engine.surface.loader.ArrayLoader;
+import engine.surface.loader.ILoader;
+import engine.utils.Block;
+import engine.utils.BlockType;
+import engine.utils.Direction;
 
 import java.util.Random;
 
-public class ArraySurface implements ISurface<Block> {
+public class ArraySurface extends AbstractSurface<Block, Block[][]> {
     private int width;
     private int height;
 
     private Block[][] field;
 
     public ArraySurface(String file_name) {
-        this.width = 10;
-        this.height = 10;
+        super(new ArrayLoader());
+        this.field = this.loader.load(file_name);
 
-        this.field = new Block[height][width];
-
-        this.load(file_name);
+        this.width  = this.field.length;
+        this.height = this.field[0].length;
     }
+
     public ArraySurface(int width, int height) {
+        super(null);
+
         this.width = width;
         this.height = height;
 
         this.field = new Block[height][width];
-    }
-
-    public void load(String file_name) {
-        for (int y = 1; y < height-1; y++) {
-            for (int x = 1; x < width-1; x++) {
-                if(x*x/(float)width/width + y*y/(float)height/height < 4.0) {
-                    field[y][x].type = BlockType.WATER;
-                } else {
-                    field[y][x].type = BlockType.EARTH;
-                }
-            }
-        }
     }
 
     private int[] findBlockCoords(Block block) {
@@ -57,16 +52,15 @@ public class ArraySurface implements ISurface<Block> {
 
     @Override
     public Block[] getNeighbours(Block block) {
-        final int moves_count = 4;
-        final int[][] moves = {{0, 1}, {-1, 0}, {0, -1}, {1, 0}};
+        Direction[] moves = Direction.Collection();
 
-        Block[] result = new Block[moves_count];
+        Block[] result = new Block[moves.length];
 
         int[] coords = findBlockCoords(block);
 
-        for (int i = 0; i < moves_count; i++) {
-            int x = coords[0] + moves[i][0];
-            int y = coords[1] + moves[i][1];
+        for (int i = 0; i < moves.length; i++) {
+            int x = coords[0] + moves[i].dx;
+            int y = coords[1] + moves[i].dy;
 
             if(x >= 0 && x < width && y >= 0 && y < height)
                 result[i] = field[y][x];
@@ -91,5 +85,20 @@ public class ArraySurface implements ISurface<Block> {
     }
     public int getWidth() {
         return width;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("ArraySurface{\n");
+        for (Block[] line : field) {
+            sb.append('\t');
+            for (Block block : line) {
+                sb.append(block.type.toString());
+            }
+            sb.append('\n');
+        }
+
+        sb.append('}');
+        return sb.toString();
     }
 }

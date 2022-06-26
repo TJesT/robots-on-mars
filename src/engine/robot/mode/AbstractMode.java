@@ -1,4 +1,4 @@
 package engine.robot.mode;
 
-public interface IMode {
+public abstract class AbstractMode {
 }

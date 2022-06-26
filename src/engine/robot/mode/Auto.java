@@ -1,4 +1,4 @@
 package engine.robot.mode;
 
-public class Auto implements IMode {
+public class Auto extends AbstractMode {
 }

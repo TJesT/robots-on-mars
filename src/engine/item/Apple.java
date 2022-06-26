@@ -1,2 +1,10 @@
-package engine.item;public class Apple {
+package engine.item;
+
+import engine.robot.AbstractRobot;
+
+public class Apple extends AbstractItem {
+    @Override
+    void use(AbstractRobot robot) {
+
+    }
 }

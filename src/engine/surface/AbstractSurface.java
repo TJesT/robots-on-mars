@@ -1,6 +1,14 @@
 package engine.surface;
 
-public abstract class AbstractSurface<B> {
-    abstract public B[] getNeighbours(B block);
-    abstract public B getStartCell();
+import engine.surface.loader.ILoader;
+
+public abstract class AbstractSurface<TCell, TStorage> {
+    ILoader<TStorage> loader;
+
+    protected AbstractSurface(ILoader<TStorage> loader) {
+        this.loader = loader;
+    }
+
+    abstract public TCell[] getNeighbours(TCell block);
+    abstract public TCell getStartCell();
 }
