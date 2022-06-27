@@ -1,12 +1,10 @@
 package engine.surface;
 
-import engine.surface.exception.NoSuchElementException;
 import engine.surface.loader.ArrayLoader;
-import engine.surface.loader.ILoader;
-import engine.utils.Block;
-import engine.utils.BlockType;
-import engine.utils.Direction;
+import engine.util.Block;
+import engine.util.Direction;
 
+import java.util.NoSuchElementException;
 import java.util.Random;
 
 public class ArraySurface extends AbstractSurface<Block, Block[][]> {
@@ -32,7 +30,7 @@ public class ArraySurface extends AbstractSurface<Block, Block[][]> {
         this.field = new Block[height][width];
     }
 
-    private int[] findBlockCoords(Block block) {
+    private int[] findCell(Block block) {
         /*TODO: create protocol for finding blocks
                 current complexity: O(N^2)*/
         int[] res = {-1, -1};
@@ -56,7 +54,7 @@ public class ArraySurface extends AbstractSurface<Block, Block[][]> {
 
         Block[] result = new Block[moves.length];
 
-        int[] coords = findBlockCoords(block);
+        int[] coords = findCell(block);
 
         for (int i = 0; i < moves.length; i++) {
             int x = coords[0] + moves[i].dx;
@@ -74,8 +72,8 @@ public class ArraySurface extends AbstractSurface<Block, Block[][]> {
     @Override
     public Block getStartCell() {
         Random random = new Random();
-        int x = random.nextInt(width);
-        int y = random.nextInt(height);
+        int x = random.nextInt(width-1)+1;
+        int y = random.nextInt(height-1)+1;
 
         return field[y][x];
     }
@@ -90,7 +88,7 @@ public class ArraySurface extends AbstractSurface<Block, Block[][]> {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("ArraySurface{\n");
-        for (Block[] line : field) {
+        for (Block[] line : this.field) {
             sb.append('\t');
             for (Block block : line) {
                 sb.append(block.type.toString());

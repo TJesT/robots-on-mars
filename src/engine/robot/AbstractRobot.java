@@ -2,7 +2,7 @@ package engine.robot;
 
 import engine.robot.mode.AbstractMode;
 import engine.surface.GraphSurface;
-import engine.utils.Direction;
+import engine.util.Direction;
 
 public abstract class AbstractRobot {
     private int x;

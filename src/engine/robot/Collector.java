@@ -1,6 +1,6 @@
 package engine.robot;
 
-import engine.utils.Direction;
+import engine.util.Direction;
 
 public class Collector extends AbstractRobot {
     @Override

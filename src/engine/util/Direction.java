@@ -1,4 +1,4 @@
-package engine.utils;
+package engine.util;
 
 public enum Direction {
     UP (0, 1),
@@ -16,5 +16,20 @@ public enum Direction {
 
     public static Direction[] Collection() {
         return new Direction[]{UP, RIGHT, DOWN, LEFT};
+    }
+
+    public Direction inverse() {
+        switch (this) {
+            case UP:
+                return DOWN;
+            case RIGHT:
+                return LEFT;
+            case DOWN:
+                return UP;
+            case LEFT:
+                return RIGHT;
+        }
+
+        return null;
     }
 }

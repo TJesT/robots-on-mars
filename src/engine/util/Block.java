@@ -1,4 +1,4 @@
-package engine.utils;
+package engine.util;
 
 public class Block {
     public BlockType type;
