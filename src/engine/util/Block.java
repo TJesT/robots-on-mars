@@ -1,11 +1,26 @@
 package engine.util;
 
+import engine.item.AbstractItem;
+
 public class Block {
     public BlockType type;
-    public int item_id;
+    public AbstractItem item;
 
     public Block() {
         this.type = BlockType.NONE;
-        this.item_id = 0;
+        this.item = null;
+    }
+
+    public static String ArrayToString(Block[][] field) {
+        StringBuilder sb = new StringBuilder();
+        for (Block[] line : field) {
+            for (Block block : line) {
+                String symbol = block.item == null ? block.type.toString() : block.item.getType().toString();
+                sb.append(symbol);
+            }
+            sb.append('\n');
+        }
+
+        return sb.toString();
     }
 }

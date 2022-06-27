@@ -1,5 +1,8 @@
 package engine.surface.loader;
 
+import engine.item.Apple;
+import engine.item.Bomb;
+import engine.item.Rock;
 import engine.util.Block;
 import engine.util.BlockType;
 
@@ -17,10 +20,17 @@ public class ArrayLoader implements ILoader<Block[][]>{
             Arrays.setAll(blocks, empty_block -> new Block());
         }
 
+        field[3][3].item = new Apple();
+        field[4][2].item = new Bomb();
+
         for (int y = 1; y < height-1; y++) {
             for (int x = 1; x < width-1; x++) {
-                if((x-width/2.0+0.5)*(x-width/2.0+0.5)/(float)width/width
-                        + (y-height/2.0+0.5)*(y-height/2.0+0.5)/(float)height/height > 1/16.0) {
+                double cxsqr = (x - width / 2.0 + 0.5) * (x - width / 2.0 + 0.5);
+                double cysqr = (y - height / 2.0 + 0.5) * (y - height / 2.0 + 0.5);
+                if(cxsqr/(float)width/width + cysqr/(float)height/height > 1/16.0) {
+                    if (cxsqr/(float)width/width + cysqr/(float)height/height > 1/9.0) {
+                        field[y][x].item = new Rock();
+                    }
                     field[y][x].type = BlockType.WATER;
                 } else {
                     field[y][x].type = BlockType.EARTH;

@@ -56,8 +56,7 @@ public class GraphSurface extends AbstractSurface<Block, Node> {
         return startNode.block;
     }
 
-    @Override
-    public String toString() {
+    public Block[][] toArray() {
         class NodeWrapper{
             public Node node;
             public int x;
@@ -70,6 +69,7 @@ public class GraphSurface extends AbstractSurface<Block, Node> {
             }
         }
 
+        //TODO: dynamic storage size
         Block[][] view = new Block[7][7];
 
         Set<Node> visitedNodes = new HashSet<>();
@@ -99,17 +99,11 @@ public class GraphSurface extends AbstractSurface<Block, Node> {
             }
         }
 
-        StringBuilder sb = new StringBuilder("GraphSurface{\n");
-        for (Block[] line : view) {
-            sb.append('\t');
-            for (Block block : line) {
-                sb.append(block.type.toString());
-            }
-            sb.append('\n');
-        }
+        return view;
+    }
 
-        sb.append('}');
-
-        return sb.toString();
+    @Override
+    public String toString() {
+        return "GraphSurface{\n" + Block.ArrayToString(this.toArray()) + "\n}";
     }
 }

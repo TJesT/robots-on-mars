@@ -1,5 +1,9 @@
 package engine;
 
+import engine.item.exceptions.ItemException;
+import engine.robot.AbstractRobot;
+import engine.robot.Collector;
+import engine.robot.Sapper;
 import engine.surface.AbstractSurface;
 import engine.surface.ArraySurface;
 import engine.surface.GraphSurface;
@@ -7,28 +11,53 @@ import engine.util.Block;
 import engine.util.Direction;
 import engine.util.Node;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Planet {
-    String planet_name;
-    ArraySurface surface;
+    private String planet_name;
+//    private AbstractSurface<Block, Block[][]> surface;
+    private ArraySurface surface;
+    private Set<AbstractRobot> robots;
+
 
     public Planet(String planet_name) {
         this.planet_name = planet_name;
 
         this.surface = new ArraySurface("file_name.txt");
 
+        this.robots = Collections.newSetFromMap(new ConcurrentHashMap<>());
+
+        Sapper sapper = new Sapper();
+        Collector collector = new Collector();
+
+        this.robots.add(sapper);
+        this.robots.add(collector);
+
         GraphSurface graph_surface = Planet.explore(this.surface);
 
         System.out.println(this.surface.toString());
+
+        Block appleBlock = this.surface.findApple();
+
+        try {
+            appleBlock.item.onStand(collector);
+            appleBlock.item.onUse(collector);
+        } catch (ItemException e) {
+            e.printStackTrace();
+        }
+
+        //TODO: clear all dead items/cells/robots
+        if(appleBlock.item.isUsed()) {
+            appleBlock.item = null;
+        }
+
         System.out.println(graph_surface.toString());
     }
 
-    private static GraphSurface explore(ArraySurface as) {
+    private static GraphSurface explore(AbstractSurface<Block, Block[][]> surface) {
         class Wrapper {
             public Direction direction;
             public Block block;
@@ -39,7 +68,7 @@ public class Planet {
             }
         }
         
-        Block startBlock = as.getStartCell();
+        Block startBlock = surface.getStartCell();
 
         Node startNode = new Node(startBlock);
 
@@ -54,7 +83,7 @@ public class Planet {
             Block curBlock = curNode.block;
 
             Direction[] directions = Direction.Collection();
-            Block[] neighbours = as.getNeighbours(curBlock);
+            Block[] neighbours = surface.getNeighbours(curBlock);
 
             Stream<Wrapper> wrapperStream = IntStream.range(0, directions.length)
                     .mapToObj(i -> new Wrapper(directions[i], neighbours[i]));

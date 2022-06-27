@@ -3,6 +3,7 @@ package engine.surface;
 import engine.surface.loader.ArrayLoader;
 import engine.util.Block;
 import engine.util.Direction;
+import engine.util.ItemType;
 
 import java.util.NoSuchElementException;
 import java.util.Random;
@@ -87,16 +88,25 @@ public class ArraySurface extends AbstractSurface<Block, Block[][]> {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("ArraySurface{\n");
-        for (Block[] line : this.field) {
-            sb.append('\t');
-            for (Block block : line) {
-                sb.append(block.type.toString());
+        return "ArraySurface{\n" + Block.ArrayToString(this.field) + "\n}";
+    }
+
+
+
+
+    public Block findApple() {
+        /*TODO: create protocol for finding blocks
+                current complexity: O(N^2)*/
+        int[] res = {-1, -1};
+
+        for(int y = 0; y < height; ++y) {
+            for (int x = 0; x < width; ++x) {
+                if(field[y][x].item != null && field[y][x].item.getType() == ItemType.APPLE) {
+                    return field[y][x];
+                }
             }
-            sb.append('\n');
         }
 
-        sb.append('}');
-        return sb.toString();
+        throw new NoSuchElementException();
     }
 }
