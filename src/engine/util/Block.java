@@ -15,7 +15,14 @@ public class Block {
         StringBuilder sb = new StringBuilder();
         for (Block[] line : field) {
             for (Block block : line) {
-                String symbol = block.item == null ? block.type.toString() : block.item.getType().toString();
+                String symbol = " ";
+                if(block != null) {
+                    if (block.item == null) {
+                        symbol = block.type.toString();
+                    } else {
+                        symbol = block.item.getType().toString();
+                    }
+                }
                 sb.append(symbol);
             }
             sb.append('\n');

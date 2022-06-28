@@ -1,20 +1,20 @@
 package engine.item;
 
-import engine.item.exceptions.CannotDefuseException;
+import engine.item.exception.CannotDefuseException;
 import engine.robot.AbstractRobot;
 import engine.util.ItemType;
 import engine.util.RobotType;
 
 public class Bomb extends AbstractItem {
     public Bomb(){
+        super();
         this.type = ItemType.BOMB;
-
         this.killer = true;
     }
 
     @Override
     public void onUse(AbstractRobot robot) throws CannotDefuseException {
-        if(robot.type != RobotType.COLLECTOR) {
+        if(robot.getType() != RobotType.COLLECTOR) {
             throw new CannotDefuseException();
         }
 
@@ -24,7 +24,7 @@ public class Bomb extends AbstractItem {
 
     @Override
     public void onStand(AbstractRobot robot) {
-        if(robot.type != RobotType.SAPPER) {
+        if(robot.getType() != RobotType.SAPPER) {
             //TODO: explode!!!
             robot.kill(this);
         }
@@ -33,7 +33,7 @@ public class Bomb extends AbstractItem {
 
     @Override
     public void onLeave(AbstractRobot robot) {
-        if(robot.type != RobotType.SAPPER) {
+        if(robot.getType() != RobotType.SAPPER) {
             //TODO: explode!!!
             robot.kill(this);
         }

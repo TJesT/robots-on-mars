@@ -1,15 +1,18 @@
 package engine;
 
-import engine.item.exceptions.ItemException;
+import engine.item.AbstractItem;
+import engine.item.exception.ItemException;
 import engine.robot.AbstractRobot;
 import engine.robot.Collector;
 import engine.robot.Sapper;
+import engine.robot.exception.RobotException;
 import engine.surface.AbstractSurface;
 import engine.surface.ArraySurface;
 import engine.surface.GraphSurface;
 import engine.util.Block;
 import engine.util.Direction;
 import engine.util.Node;
+import engine.util.RobotType;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,43 +21,139 @@ import java.util.stream.Stream;
 
 public class Planet {
     private String planet_name;
-//    private AbstractSurface<Block, Block[][]> surface;
     private ArraySurface surface;
     private Set<AbstractRobot> robots;
-
 
     public Planet(String planet_name) {
         this.planet_name = planet_name;
 
         this.surface = new ArraySurface("file_name.txt");
 
+        System.out.println(this.surface.toString());
+
         this.robots = Collections.newSetFromMap(new ConcurrentHashMap<>());
-
-        Sapper sapper = new Sapper();
-        Collector collector = new Collector();
-
-        this.robots.add(sapper);
-        this.robots.add(collector);
 
         GraphSurface graph_surface = Planet.explore(this.surface);
 
-        System.out.println(this.surface.toString());
+        Collector collector = new Collector(graph_surface.getStartCell());
 
-        Block appleBlock = this.surface.findApple();
+        this.robots.add(collector);
+
+        System.out.println(collector.getMapStringView());
+
+        this.updateRobotNeighbours(collector);
+        System.out.println(collector.getMapStringView());
+
+        this.moveRobot(collector, Direction.UP);
+        this.updateRobotNeighbours(collector);
+        System.out.println(collector.getMapStringView());
+
+
+        System.out.println(graph_surface.toString());
+    }
+
+    /*TODO: - robot factory
+    *       - threading for commands
+    * */
+    public AbstractRobot addRobot(String name, RobotType type) {
+        AbstractRobot robot;
+        Block block = this.surface.getStartCell();
+        switch (type) {
+            case COLLECTOR:
+                robot = new Collector(block);
+                break;
+            case SAPPER:
+                robot = new Sapper(block);
+                break;
+            default:
+                return null;
+        }
+
+        this.robots.add(robot);
+
+        return robot;
+    }
+
+    public void updateRobotNeighbours(AbstractRobot robot) {
+        class Wrapper {
+            public Direction direction;
+            public Block block;
+
+            public Wrapper(Direction direction, Block block) {
+                this.direction = direction;
+                this.block = block;
+            }
+        }
+
+        Node curNode = robot.getPosition();
+        Block curBlock = curNode.block;
+
+        Direction[] directions = Direction.Collection();
+        Block[] neighbours = this.surface.getNeighbours(curBlock);
+
+        Stream<Wrapper> wrapperStream = IntStream.range(0, directions.length)
+                .mapToObj(i -> new Wrapper(directions[i], neighbours[i]));
+
+        wrapperStream.forEach(w -> {
+            if(w.block != null) {
+                Node adjacentNode = new Node(w.block);
+                curNode.setNeighbour(w.direction, adjacentNode);
+                adjacentNode.setNeighbour(w.direction.inverse(), curNode);
+            }
+        });
+    }
+    public void moveRobot(AbstractRobot robot, Direction direction) {
+        Block leavingBlock = robot.getPosition().block;
+        AbstractItem leavingItem = leavingBlock.item;
+
+        if (leavingItem != null) {
+            leavingItem.onLeave(robot);
+        }
+
+        clearRobotIfDead(robot);
+        clearItemFromCellIfUsed(leavingBlock);
+
+        // robots can only travel on explored part of a map
+        try {
+            robot.move(direction);
+        } catch (RobotException e) {
+            e.printStackTrace();
+        }
+
+        Block comingBlock = robot.getPosition().block;
+        AbstractItem comingItem = comingBlock.item;
+
+        if (comingItem != null) {
+            comingItem.onStand(robot);
+        }
+
+        clearRobotIfDead(robot);
+        clearItemFromCellIfUsed(comingBlock);
+    }
+    public void useItem(AbstractRobot robot) {
+        Node position = robot.getPosition();
+        if (position.block.item == null) return;
 
         try {
-            appleBlock.item.onStand(collector);
-            appleBlock.item.onUse(collector);
+            position.block.item.onUse(robot);
         } catch (ItemException e) {
             e.printStackTrace();
         }
 
-        //TODO: clear all dead items/cells/robots
-        if(appleBlock.item.isUsed()) {
-            appleBlock.item = null;
-        }
+        clearRobotIfDead(robot);
+        clearItemFromCellIfUsed(position.block);
+    }
 
-        System.out.println(graph_surface.toString());
+    private void clearRobotIfDead(AbstractRobot robot) {
+        if (!robot.isAlive()) {
+            this.robots.remove(robot);
+        }
+    }
+    private void clearItemFromCellIfUsed(Block block) {
+        if (block.item == null) return;
+        if (block.item.isUsed()) {
+            block.item = null;
+        }
     }
 
     private static GraphSurface explore(AbstractSurface<Block, Block[][]> surface) {

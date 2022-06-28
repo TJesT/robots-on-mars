@@ -1,4 +1,4 @@
-package engine.item.exceptions;
+package engine.item.exception;
 
 public class ItemException extends Exception {
 }

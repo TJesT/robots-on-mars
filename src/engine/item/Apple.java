@@ -1,18 +1,19 @@
 package engine.item;
 
-import engine.item.exceptions.CannotCollectException;
+import engine.item.exception.CannotCollectException;
 import engine.robot.AbstractRobot;
 import engine.util.ItemType;
 import engine.util.RobotType;
 
 public class Apple extends AbstractItem {
     public Apple(){
+        super();
         this.type = ItemType.APPLE;
     }
 
     @Override
     public void onUse(AbstractRobot robot) throws CannotCollectException {
-        if(robot.type != RobotType.COLLECTOR) {
+        if(robot.getType() != RobotType.COLLECTOR) {
             throw new CannotCollectException();
         }
 
@@ -25,11 +26,11 @@ public class Apple extends AbstractItem {
 
     @Override
     public void onStand(AbstractRobot robot) {
-        this.collectable = true;
+        this.interactionSet.add(robot);
     }
 
     @Override
     public void onLeave(AbstractRobot robot) {
-        this.collectable = false;
+        this.interactionSet.remove(robot);
     }
 }

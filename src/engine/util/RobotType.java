@@ -9,9 +9,9 @@ public enum RobotType {
     public String toString() {
         switch (this) {
             case COLLECTOR:
-                return "C";
+                return "\u001B[30m" + "C" + "\u001B[0m";
             case SAPPER:
-                return "S";
+                return "\u001B[30m" + "S" + "\u001B[0m";
         }
 
         return null;

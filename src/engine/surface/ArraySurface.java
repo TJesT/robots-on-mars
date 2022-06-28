@@ -73,8 +73,8 @@ public class ArraySurface extends AbstractSurface<Block, Block[][]> {
     @Override
     public Block getStartCell() {
         Random random = new Random();
-        int x = random.nextInt(width-1)+1;
-        int y = random.nextInt(height-1)+1;
+        int x = random.nextInt(width-2)+2;
+        int y = random.nextInt(height-2)+2;
 
         return field[y][x];
     }
