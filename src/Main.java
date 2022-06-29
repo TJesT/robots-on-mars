@@ -1,3 +1,7 @@
+import controller.command.AbstractCommand;
+import controller.exception.CannotExecuteException;
+import controller.exception.CannotParseException;
+import controller.parser.CommandParser;
 import engine.Model;
 import engine.util.*;
 
@@ -9,66 +13,25 @@ import java.util.stream.Stream;
 public class Main {
     public static void main(String[] args) {
         Model model = new Model("planet");
+        CommandParser parser = new CommandParser(model);
 
-        Scanner scanner = new Scanner(System.in);
+        GameState state = GameState.START;
 
-        String name = "Adam";
-
-        model.addRobot(name, RobotType.COLLECTOR);
-
-        while (scanner.hasNextLine()) {
-            String line = scanner.nextLine().trim();
-
-            List<String> arg = Stream.of(line.split(" "))
-                    .map(String::new)
-                    .collect(Collectors.toList());
-
-            String cmd = arg.get(0);
-            arg.remove(0);
-
-            if (cmd.startsWith("EXIT")) {
-                break;
+        while (state != GameState.FINISH) {
+            AbstractCommand cmd = null;
+            try {
+                cmd = parser.readCommand();
+            } catch (CannotParseException e) {
+                e.printStackTrace();
             }
 
-            if (cmd.startsWith("CHANGE_MODE")) {
-                String arg1 = arg.get(0);
-                ModeType mode = ModeType.MANUAL;
-                if (arg1.startsWith("SCAN")) {
-                    mode = ModeType.SCAN;
-                } else if (arg1.startsWith("AUTO")) {
-                    mode = ModeType.AUTO;
-                }
-                model.changeMode(name, mode);
-                continue;
-            }
-
-            ActionType actionType;
-            if (cmd.startsWith("GRAB")) {
-                actionType = ActionType.GRAB;
-            } else if (cmd.startsWith("MOVE")) {
-                actionType = ActionType.MOVE;
-            } else {
-                actionType = ActionType.SCAN;
-            }
-
-            Action action = new Action(actionType, null);
-
-            if (actionType == ActionType.MOVE) {
-                String arg1 = arg.get(0);
-                if (arg1.startsWith("U")) {
-                    action.direction = Direction.UP;
-                } else if (arg1.startsWith("R")) {
-                    action.direction = Direction.RIGHT;
-                } else if (arg1.startsWith("D")) {
-                    action.direction = Direction.DOWN;
-                } else if (arg1.startsWith("L")) {
-                    action.direction = Direction.LEFT;
+            if(cmd != null) {
+                try {
+                    state = cmd.execute();
+                } catch (CannotExecuteException e) {
+                    e.printStackTrace();
                 }
             }
-
-            model.makeStep(name, action);
         }
-
-        scanner.close();
     }
 }

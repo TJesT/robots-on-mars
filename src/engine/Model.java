@@ -11,6 +11,7 @@ import engine.util.*;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -44,7 +45,7 @@ public class Model {
         if (this.robots.containsKey(name)) return;
 
         AbstractRobot robot;
-        // Block block = this.surface.getStartCell();
+//        Block block = this.surface.getStartCell();
         Block block = this.commonBlock;
 
         switch (type) {
@@ -57,7 +58,7 @@ public class Model {
             default:
                 return;
         }
-        robot.explored_map = this.graph_surface;
+//        robot.explored_map = this.graph_surface;
         this.robots.put(name, robot);
     }
     public void makeStep(String name, Action action) {
