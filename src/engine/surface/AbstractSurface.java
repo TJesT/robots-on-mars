@@ -1,14 +1,7 @@
 package engine.surface;
 
-import engine.surface.loader.ILoader;
-
-public abstract class AbstractSurface<TCell, TStorage> {
-    ILoader<TStorage> loader;
-
-    protected AbstractSurface(ILoader<TStorage> loader) {
-        this.loader = loader;
-    }
-
+/* TODO: dk how, but AbstractSurface must be thread safe */
+public abstract class AbstractSurface<TCell> {
     abstract public TCell[] getNeighbours(TCell block);
     abstract public TCell getStartCell();
 }

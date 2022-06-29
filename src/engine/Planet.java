@@ -35,18 +35,34 @@ public class Planet {
 
         GraphSurface graph_surface = Planet.explore(this.surface);
 
-        Collector collector = new Collector(graph_surface.getStartCell());
+        Collector collector = new Collector(this.surface, graph_surface.getStartCell());
 
         this.robots.add(collector);
 
         System.out.println(collector.getMapStringView());
 
-        this.updateRobotNeighbours(collector);
-        System.out.println(collector.getMapStringView());
+        try {
+            collector.scan();
+            collector.move(Direction.UP);
+            System.out.println(collector.getMapStringView());
 
-        this.moveRobot(collector, Direction.UP);
-        this.updateRobotNeighbours(collector);
-        System.out.println(collector.getMapStringView());
+            collector.scan();
+            collector.move(Direction.UP);
+            System.out.println(collector.getMapStringView());
+
+            collector.scan();
+            collector.move(Direction.UP);
+            System.out.println(collector.getMapStringView());
+
+            collector.scan();
+            collector.move(Direction.RIGHT);
+            System.out.println(collector.getMapStringView());
+
+            collector.scan();
+            System.out.println(collector.getMapStringView());
+        } catch (RobotException e) {
+            e.printStackTrace();
+        }
 
 
         System.out.println(graph_surface.toString());
@@ -60,10 +76,10 @@ public class Planet {
         Block block = this.surface.getStartCell();
         switch (type) {
             case COLLECTOR:
-                robot = new Collector(block);
+                robot = new Collector(this.surface, block);
                 break;
             case SAPPER:
-                robot = new Sapper(block);
+                robot = new Sapper(this.surface, block);
                 break;
             default:
                 return null;
@@ -74,79 +90,11 @@ public class Planet {
         return robot;
     }
 
-    public void updateRobotNeighbours(AbstractRobot robot) {
-        class Wrapper {
-            public Direction direction;
-            public Block block;
-
-            public Wrapper(Direction direction, Block block) {
-                this.direction = direction;
-                this.block = block;
-            }
-        }
-
-        Node curNode = robot.getPosition();
-        Block curBlock = curNode.block;
-
-        Direction[] directions = Direction.Collection();
-        Block[] neighbours = this.surface.getNeighbours(curBlock);
-
-        Stream<Wrapper> wrapperStream = IntStream.range(0, directions.length)
-                .mapToObj(i -> new Wrapper(directions[i], neighbours[i]));
-
-        wrapperStream.forEach(w -> {
-            if(w.block != null) {
-                Node adjacentNode = new Node(w.block);
-                curNode.setNeighbour(w.direction, adjacentNode);
-                adjacentNode.setNeighbour(w.direction.inverse(), curNode);
-            }
-        });
-    }
-    public void moveRobot(AbstractRobot robot, Direction direction) {
-        Block leavingBlock = robot.getPosition().block;
-        AbstractItem leavingItem = leavingBlock.item;
-
-        if (leavingItem != null) {
-            leavingItem.onLeave(robot);
-        }
-
-        clearRobotIfDead(robot);
-        clearItemFromCellIfUsed(leavingBlock);
-
-        // robots can only travel on explored part of a map
-        try {
-            robot.move(direction);
-        } catch (RobotException e) {
-            e.printStackTrace();
-        }
-
-        Block comingBlock = robot.getPosition().block;
-        AbstractItem comingItem = comingBlock.item;
-
-        if (comingItem != null) {
-            comingItem.onStand(robot);
-        }
-
-        clearRobotIfDead(robot);
-        clearItemFromCellIfUsed(comingBlock);
-    }
-    public void useItem(AbstractRobot robot) {
-        Node position = robot.getPosition();
-        if (position.block.item == null) return;
-
-        try {
-            position.block.item.onUse(robot);
-        } catch (ItemException e) {
-            e.printStackTrace();
-        }
-
-        clearRobotIfDead(robot);
-        clearItemFromCellIfUsed(position.block);
-    }
-
     private void clearRobotIfDead(AbstractRobot robot) {
         if (!robot.isAlive()) {
-            this.robots.remove(robot);
+            if (this.robots.contains(robot)) {
+                this.robots.remove(robot);
+            }
         }
     }
     private void clearItemFromCellIfUsed(Block block) {
@@ -156,7 +104,7 @@ public class Planet {
         }
     }
 
-    private static GraphSurface explore(AbstractSurface<Block, Block[][]> surface) {
+    private static GraphSurface explore(AbstractSurface<Block> surface) {
         class Wrapper {
             public Direction direction;
             public Block block;

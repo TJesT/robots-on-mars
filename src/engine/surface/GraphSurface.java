@@ -6,12 +6,10 @@ import engine.util.Node;
 
 import java.util.*;
 
-public class GraphSurface extends AbstractSurface<Block, Node> {
+public class GraphSurface extends AbstractSurface<Block> {
     private Node startNode;
 
     public GraphSurface(Node startNode) {
-        super(null);
-
         this.startNode = startNode;
     }
 

@@ -1,6 +1,7 @@
 package engine.surface;
 
 import engine.surface.loader.ArrayLoader;
+import engine.surface.loader.ILoader;
 import engine.util.Block;
 import engine.util.Direction;
 import engine.util.ItemType;
@@ -8,14 +9,16 @@ import engine.util.ItemType;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
-public class ArraySurface extends AbstractSurface<Block, Block[][]> {
+public class ArraySurface extends AbstractSurface<Block> {
     private int width;
     private int height;
 
+    ILoader<Block[][]> loader;
     private Block[][] field;
 
     public ArraySurface(String file_name) {
-        super(new ArrayLoader());
+        this.loader = new ArrayLoader();
+
         this.field = this.loader.load(file_name);
 
         this.width  = this.field.length;
@@ -23,7 +26,7 @@ public class ArraySurface extends AbstractSurface<Block, Block[][]> {
     }
 
     public ArraySurface(int width, int height) {
-        super(null);
+        this.loader = null;
 
         this.width = width;
         this.height = height;
