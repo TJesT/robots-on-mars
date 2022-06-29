@@ -1,12 +1,10 @@
 package engine;
 
-import engine.item.AbstractItem;
-import engine.item.exception.ItemException;
 import engine.robot.AbstractRobot;
 import engine.robot.Collector;
 import engine.robot.Sapper;
 import engine.robot.exception.RobotException;
-import engine.surface.AbstractSurface;
+import engine.surface.ISurface;
 import engine.surface.ArraySurface;
 import engine.surface.GraphSurface;
 import engine.util.Block;
@@ -19,25 +17,26 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class Planet {
-    private String planet_name;
-    private ArraySurface surface;
-    private Set<AbstractRobot> robots;
+public class Model {
+    private String session_name;
 
-    public Planet(String planet_name) {
-        this.planet_name = planet_name;
+    private ArraySurface surface;
+    private ConcurrentHashMap<String, AbstractRobot> robots;
+
+    public Model(String session_name) {
+        this.session_name = session_name;
 
         this.surface = new ArraySurface("file_name.txt");
 
         System.out.println(this.surface.toString());
 
-        this.robots = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        this.robots = new ConcurrentHashMap<>();
 
-        GraphSurface graph_surface = Planet.explore(this.surface);
+        GraphSurface graph_surface = Model.explore(this.surface);
 
         Collector collector = new Collector(this.surface, graph_surface.getStartCell());
 
-        this.robots.add(collector);
+        this.robots.put("Adam", collector);
 
         System.out.println(collector.getMapStringView());
 
@@ -71,9 +70,12 @@ public class Planet {
     /*TODO: - robot factory
     *       - threading for commands
     * */
-    public AbstractRobot addRobot(String name, RobotType type) {
+    public void addRobot(String name, RobotType type) {
+        if (this.robots.contains(name)) return;
+
         AbstractRobot robot;
         Block block = this.surface.getStartCell();
+
         switch (type) {
             case COLLECTOR:
                 robot = new Collector(this.surface, block);
@@ -82,29 +84,27 @@ public class Planet {
                 robot = new Sapper(this.surface, block);
                 break;
             default:
-                return null;
+                return;
         }
 
-        this.robots.add(robot);
-
-        return robot;
+        this.robots.put(name, robot);
     }
 
-    private void clearRobotIfDead(AbstractRobot robot) {
+    private synchronized void clearRobotIfDead(AbstractRobot robot) {
         if (!robot.isAlive()) {
             if (this.robots.contains(robot)) {
                 this.robots.remove(robot);
             }
         }
     }
-    private void clearItemFromCellIfUsed(Block block) {
+    private synchronized void clearItemFromCellIfUsed(Block block) {
         if (block.item == null) return;
         if (block.item.isUsed()) {
             block.item = null;
         }
     }
 
-    private static GraphSurface explore(AbstractSurface<Block> surface) {
+    private static GraphSurface explore(ISurface<Block> surface) {
         class Wrapper {
             public Direction direction;
             public Block block;

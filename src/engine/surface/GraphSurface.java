@@ -6,7 +6,8 @@ import engine.util.Node;
 
 import java.util.*;
 
-public class GraphSurface extends AbstractSurface<Block> {
+// TODO: Graph adding
+public class GraphSurface implements ISurface<Block> {
     private Node startNode;
 
     public GraphSurface(Node startNode) {

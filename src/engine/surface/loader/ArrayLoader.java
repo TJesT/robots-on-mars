@@ -10,7 +10,7 @@ import java.util.Arrays;
 
 public class ArrayLoader implements ILoader<Block[][]>{
     @Override
-    public Block[][] load(String file_name) {
+    public Block[][] load(String fileName) {
         Block[][] field = new Block[7][7];
 
         int height = field.length;

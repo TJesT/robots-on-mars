@@ -8,18 +8,19 @@ import engine.util.ItemType;
 
 import java.util.NoSuchElementException;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicReference;
 
-public class ArraySurface extends AbstractSurface<Block> {
+public class ArraySurface implements ISurface<Block> {
     private int width;
     private int height;
 
     ILoader<Block[][]> loader;
     private Block[][] field;
 
-    public ArraySurface(String file_name) {
+    public ArraySurface(String fileName) {
         this.loader = new ArrayLoader();
 
-        this.field = this.loader.load(file_name);
+        this.field = this.loader.load(fileName);
 
         this.width  = this.field.length;
         this.height = this.field[0].length;

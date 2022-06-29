@@ -4,8 +4,9 @@ import engine.item.AbstractItem;
 import engine.item.exception.ItemException;
 import engine.robot.exception.*;
 import engine.robot.mode.AbstractMode;
+import engine.robot.mode.Manual;
 import engine.robot.storage.IStorage;
-import engine.surface.AbstractSurface;
+import engine.surface.ISurface;
 import engine.surface.GraphSurface;
 import engine.util.*;
 
@@ -18,16 +19,21 @@ public abstract class AbstractRobot {
     protected Direction lastDirection;
 
     protected boolean alive = false;
+
     protected Node position;
-    protected AbstractMode mode;
-    protected AbstractSurface<Block> surface;
+    protected ISurface<Block> surface;
     protected GraphSurface explored_map;
+
+    protected AbstractMode mode;
+
     public IStorage<ItemType> inventory = null;
 
-    public AbstractRobot(AbstractSurface<Block> surface, Block block) {
+    public AbstractRobot(ISurface<Block> surface, Block block) {
         this.surface = surface;
         this.position = new Node(block);
         this.explored_map = new GraphSurface(this.position);
+
+        this.mode = new Manual(this);
     }
 
     public Node getPosition() {
@@ -90,6 +96,9 @@ public abstract class AbstractRobot {
         }
     }
 
+    public void step(Action action) throws RobotException {
+        this.mode.step(action);
+    }
 
     public void scan() throws RobotException {
         if (!this.alive) return;
@@ -134,6 +143,7 @@ public abstract class AbstractRobot {
         }
     }
     public void move(Direction direction) throws RobotException {
+        if (direction == null) return;
         if (!this.alive) return;
         // trigger onLeave()
         Block leavingBlock = this.position.block;

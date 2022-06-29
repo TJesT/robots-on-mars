@@ -1,7 +1,7 @@
-import engine.Planet;
+import engine.Model;
 
 public class Main {
     public static void main(String[] args) {
-        Planet planet = new Planet("planet");
+        Model planet = new Model("planet");
     }
 }
