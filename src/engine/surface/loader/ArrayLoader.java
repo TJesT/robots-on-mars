@@ -34,7 +34,6 @@ public class ArrayLoader implements ILoader<Block[][]>{
                     field[y][x].type = BlockType.WATER;
                 } else {
                     field[y][x].type = BlockType.EARTH;
-                    field[y][x].item = new Bomb();
                 }
             }
         }

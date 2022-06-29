@@ -4,9 +4,11 @@ import engine.robot.AbstractRobot;
 import engine.robot.exception.RobotException;
 import engine.util.Action;
 import engine.util.ActionType;
+import engine.util.ModeType;
 
 public abstract class AbstractMode {
     AbstractRobot worker;
+    ModeType type = ModeType.NONE;
     public AbstractMode(AbstractRobot robot) {
         this.worker = robot;
     }

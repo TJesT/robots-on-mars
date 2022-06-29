@@ -14,6 +14,12 @@ public class CountingStorage implements IStorage<ItemType>{
         this.storage = new ConcurrentHashMap<>();
     }
 
+    public int getCount(ItemType item) {
+        if (!this.storage.containsKey(item)) return 0;
+
+        return this.storage.get(item);
+    }
+
     @Override
     public void store(ItemType item) {
         if (this.storage.containsKey(item)) {

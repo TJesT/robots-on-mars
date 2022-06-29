@@ -3,6 +3,8 @@ package engine.robot.mode;
 import engine.robot.AbstractRobot;
 import engine.robot.exception.RobotException;
 import engine.util.Action;
+import engine.util.ModeType;
+
 import java.util.LinkedList;
 
 public class Scan extends AbstractMode {
@@ -10,6 +12,7 @@ public class Scan extends AbstractMode {
 
     public Scan(AbstractRobot robot) {
         super(robot);
+        this.type = ModeType.SCAN;
         this.taskQueue = new LinkedList<>();
         /* TODO: analyze explored map and create a task queue
                   to SUCCESSFULLY explore map.

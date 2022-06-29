@@ -25,11 +25,11 @@ public abstract class AbstractItem {
         return killer;
     }
 
-    protected Set<AbstractRobot> interactionSet;
-
-    public AbstractItem() {
-        interactionSet = Collections.newSetFromMap(new ConcurrentHashMap<>());
-    }
+//    protected Set<AbstractRobot> interactionSet;
+//
+//    public AbstractItem() {
+//        interactionSet = Collections.newSetFromMap(new ConcurrentHashMap<>());
+//    }
 
     //TODO: should be asynchronous
     abstract public void onUse(AbstractRobot robot) throws ItemException;

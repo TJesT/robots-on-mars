@@ -8,6 +8,7 @@ import engine.util.RobotType;
 public class Apple extends AbstractItem {
     public Apple(){
         super();
+        this.collectable = true;
         this.type = ItemType.APPLE;
     }
 
@@ -17,20 +18,19 @@ public class Apple extends AbstractItem {
             throw new CannotCollectException();
         }
 
-        if (this.collectable) {
+        if (!this.used && this.collectable) {
             robot.inventory.store(this.type);
             this.used = true;
-            this.collectable = false;
         }
     }
 
     @Override
     public void onStand(AbstractRobot robot) {
-        this.interactionSet.add(robot);
+//        this.interactionSet.add(robot);
     }
 
     @Override
     public void onLeave(AbstractRobot robot) {
-        this.interactionSet.remove(robot);
+//        this.interactionSet.remove(robot);
     }
 }

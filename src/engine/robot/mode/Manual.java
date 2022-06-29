@@ -3,7 +3,6 @@ package engine.robot.mode;
 import engine.robot.AbstractRobot;
 import engine.robot.exception.RobotException;
 import engine.util.Action;
-import engine.util.ActionType;
 
 public class Manual extends AbstractMode {
     public Manual(AbstractRobot robot) {

@@ -7,10 +7,7 @@ import engine.robot.exception.RobotException;
 import engine.surface.ISurface;
 import engine.surface.ArraySurface;
 import engine.surface.GraphSurface;
-import engine.util.Block;
-import engine.util.Direction;
-import engine.util.Node;
-import engine.util.RobotType;
+import engine.util.*;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,63 +15,37 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Model {
-    private String session_name;
+    private String name;
 
+    private Block commonBlock;
+    private GraphSurface graph_surface;
     private ArraySurface surface;
     private ConcurrentHashMap<String, AbstractRobot> robots;
 
-    public Model(String session_name) {
-        this.session_name = session_name;
+    public Model(String name) {
+        this.name = name;
 
         this.surface = new ArraySurface("file_name.txt");
 
-        System.out.println(this.surface.toString());
+//        System.out.println(this.surface.toString());
 
         this.robots = new ConcurrentHashMap<>();
 
-        GraphSurface graph_surface = Model.explore(this.surface);
+        this.graph_surface = Model.explore(this.surface);
 
-        Collector collector = new Collector(this.surface, graph_surface.getStartCell());
+        this.commonBlock = graph_surface.getStartCell();
 
-        this.robots.put("Adam", collector);
-
-        System.out.println(collector.getMapStringView());
-
-        try {
-            collector.scan();
-            collector.move(Direction.UP);
-            System.out.println(collector.getMapStringView());
-
-            collector.scan();
-            collector.move(Direction.UP);
-            System.out.println(collector.getMapStringView());
-
-            collector.scan();
-            collector.move(Direction.UP);
-            System.out.println(collector.getMapStringView());
-
-            collector.scan();
-            collector.move(Direction.RIGHT);
-            System.out.println(collector.getMapStringView());
-
-            collector.scan();
-            System.out.println(collector.getMapStringView());
-        } catch (RobotException e) {
-            e.printStackTrace();
-        }
-
-
-        System.out.println(graph_surface.toString());
+//        System.out.println(graph_surface.toString());
     }
 
     /*TODO: - robot factory
-    *       - threading for commands
     * */
     public void addRobot(String name, RobotType type) {
-        if (this.robots.contains(name)) return;
+        if (this.robots.containsKey(name)) return;
 
         AbstractRobot robot;
-        Block block = this.surface.getStartCell();
+        // Block block = this.surface.getStartCell();
+        Block block = this.commonBlock;
 
         switch (type) {
             case COLLECTOR:
@@ -86,8 +57,31 @@ public class Model {
             default:
                 return;
         }
-
+        robot.explored_map = this.graph_surface;
         this.robots.put(name, robot);
+    }
+    public void makeStep(String name, Action action) {
+        if(!robots.containsKey(name)) return;
+
+        AbstractRobot robot = this.robots.get(name);
+
+        clearItemFromCellIfUsed(robot.getPosition().block);
+        try {
+            robot.step(action);
+        } catch (RobotException e) {
+            e.printStackTrace();
+        }
+        System.out.println(robot.getMapStringView());
+
+        clearItemFromCellIfUsed(robot.getPosition().block);
+        clearRobotIfDead(robot);
+    }
+    public void changeMode(String name, ModeType type) {
+        if(!robots.containsKey(name)) return;
+
+        AbstractRobot robot = this.robots.get(name);
+
+        robot.setMode(type);
     }
 
     private synchronized void clearRobotIfDead(AbstractRobot robot) {

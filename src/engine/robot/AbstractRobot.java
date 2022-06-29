@@ -4,8 +4,10 @@ import engine.item.AbstractItem;
 import engine.item.exception.ItemException;
 import engine.robot.exception.*;
 import engine.robot.mode.AbstractMode;
+import engine.robot.mode.Auto;
 import engine.robot.mode.Manual;
-import engine.robot.storage.IStorage;
+import engine.robot.mode.Scan;
+import engine.robot.storage.CountingStorage;
 import engine.surface.ISurface;
 import engine.surface.GraphSurface;
 import engine.util.*;
@@ -16,32 +18,44 @@ import java.util.stream.Stream;
 public abstract class AbstractRobot {
     protected RobotType type = RobotType.NONE;
 
-    protected Direction lastDirection;
-
     protected boolean alive = false;
 
     protected Node position;
     protected ISurface<Block> surface;
-    protected GraphSurface explored_map;
+    public GraphSurface explored_map;
 
     protected AbstractMode mode;
 
-    public IStorage<ItemType> inventory = null;
+//    public IStorage<ItemType> inventory = null;
+    public CountingStorage inventory = null;
 
     public AbstractRobot(ISurface<Block> surface, Block block) {
         this.surface = surface;
         this.position = new Node(block);
         this.explored_map = new GraphSurface(this.position);
 
+//        this.mode = new Auto(this);
         this.mode = new Manual(this);
+    }
+
+    public void setMode(ModeType type) {
+        switch (type) {
+            case MANUAL:
+                this.mode = new Manual(this);
+                break;
+            case AUTO:
+                this.mode = new Auto(this);
+                break;
+            case SCAN:
+                this.mode = new Scan(this);
+                break;
+        }
     }
 
     public Node getPosition() {
         return position;
     }
-    public Direction getLastDirection() {
-        return lastDirection;
-    }
+
     public RobotType getType() {
         return type;
     }
@@ -138,6 +152,8 @@ public abstract class AbstractRobot {
 
         try {
             this.position.block.item.onUse(this);
+//            System.out.println("GRABBING " + this.position.block.item.getType());
+//            System.out.println("HOLDING" + this.inventory.getCount(ItemType.APPLE));
         } catch (ItemException e) {
             e.printStackTrace();
         }
@@ -154,13 +170,14 @@ public abstract class AbstractRobot {
         }
 
         if (!this.alive) return;
-        // actually move
-        this.lastDirection = direction;
-        if (this.position.getNeighbour(direction) == null) {
-            throw new IntoTheUnknownException();
-        }
-        this.position = this.position.getNeighbour(direction);
 
+        // actually move
+        Node neighbour = this.position.getNeighbour(direction);
+        if (neighbour == null) throw new IntoTheUnknownException();
+        if (neighbour.block == null || (neighbour.block.item != null &&
+                neighbour.block.item.getType() == ItemType.ROCK)) return;
+
+        this.position = this.position.getNeighbour(direction);
 
         // trigger onStand()
         Block comingBlock = this.position.block;

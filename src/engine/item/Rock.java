@@ -17,14 +17,7 @@ public class Rock extends AbstractItem {
 
     @Override
     public void onStand(AbstractRobot robot) {
-        //TODO: make him leave
-        try {
-            if (robot.getLastDirection() == null) return;
-            robot.move(robot.getLastDirection().inverse());
-        } catch (RobotException e) {
-            // How the fuck did you step from null ???
-            e.printStackTrace();
-        }
+        //TODO: absolutely nothing
     }
 
     @Override
