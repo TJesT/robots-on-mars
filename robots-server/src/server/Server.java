@@ -1,5 +1,11 @@
 package server;
 
+import controller.command.AbstractCommand;
+import controller.exception.CannotExecuteException;
+import controller.exception.CannotParseException;
+import controller.parser.CommandParser;
+import engine.Model;
+import engine.util.GameState;
 import network.chat.Chat;
 import network.chat.Message;
 import network.chat.MessageType;
@@ -22,35 +28,46 @@ import java.util.logging.Logger;
 public class Server implements Runnable {
     private static final Logger logger = Logger.getLogger(Server.class.getName());
 
+    private final boolean isLogging;
     private int port;
+    private int numOfShowingMessages;
+
     private ServerSocket serverSocket;
+
     private ConcurrentHashMap<UserName, RequestHandler> clients;
     private ConcurrentHashMap<MessageType, IServerCommand> serverCommands;
-    private int numOfShowingMessages;
-    private final Chat chat;
-    private final boolean isLogging;
-    private final UserName serverName;
 
+    private final Model model;
+    private final CommandParser parser;
+
+    private final Chat chat;
+    private final UserName serverName;
 
     public Server() {
         Properties properties = new Properties();
+
         try {
             properties.load(ClassLoader.getSystemResourceAsStream("resources/server.properties"));
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             ex.printStackTrace();
         }
+
         try {
             serverName = new UserName(properties.getProperty("ServerName"));
-        }
-        catch (InvalidUserNameException ex) {
+        } catch (InvalidUserNameException ex) {
             throw new RuntimeException("Invalid server name");
         }
+
         port = Integer.parseInt(properties.getProperty("Port"));
         numOfShowingMessages = Integer.parseInt(properties.getProperty("NumShowingMessages"));
+
         clients = new ConcurrentHashMap<UserName, RequestHandler>();
         chat = new Chat(numOfShowingMessages);
+        model = new Model("model");
+        parser = new CommandParser(model);
+
         isLogging = Boolean.parseBoolean(properties.getProperty("Logging"));
+
         serverCommands = new ConcurrentHashMap<>();
         serverCommands.put(MessageType.GENERAL_MESSAGE, new GeneralMessageCommand());
         serverCommands.put(MessageType.SERVER_REQUEST, new ServerRequestCommand());
@@ -102,27 +119,38 @@ public class Server implements Runnable {
         return serverCommands.get(messageType);
     }
 
-    private void addMessage(Message message) {
-        synchronized (chat) {
-            chat.addMessage(message);
+    public AbstractCommand parseMessage(Message message) {
+        AbstractCommand command = null;
+        try {
+             command= this.parser.parseCommand(message.getMessageData());
+        } catch (CannotParseException e) {
+            e.printStackTrace();
         }
+
+        return command;
     }
+//    private void addMessage(Message message) {
+//        synchronized (chat) {
+//            chat.addMessage(message);
+//        }
+//    }
 
     public void broadcastMessage(Message message) {
-        addMessage(message);
+//        addMessage(message);
         for (Map.Entry<UserName, RequestHandler> entry : clients.entrySet()) {
             entry.getValue().sendMessage(message);
         }
+
         logger.info("Broadcast message from " + message.getSenderName().getName());
     }
 
-    public LinkedList<Message> getStoredMessages() {
-        LinkedList<Message> messages;
-        synchronized (chat) {
-            messages = chat.getMessageList();
-        }
-        return messages;
-    }
+//    public LinkedList<Message> getStoredMessages() {
+//        LinkedList<Message> messages;
+//        synchronized (chat) {
+//            messages = chat.getMessageList();
+//        }
+//        return messages;
+//    }
 
     public void close() {
         try {
@@ -167,5 +195,9 @@ public class Server implements Runnable {
             disconnect(entry.getKey());
         }
         close();
+    }
+
+    public Message getField() {
+        return new Message(this.model.getStringView(), MessageType.SERVER_RESPONSE, serverName);
     }
 }

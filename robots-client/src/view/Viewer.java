@@ -9,6 +9,7 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.DefaultCaret;
+import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
@@ -48,9 +49,11 @@ public class Viewer implements Observer, DocumentListener {
         helpPanel = new HelpPanel();
         mainPanel.add(helpPanel);
 
-        chatArea = new JTextArea(40, 40);
+        chatArea = new JTextArea(10, 9);
         chatArea.setEditable(false);
         chatArea.setLineWrap(true);
+        chatArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 20));
+
         JScrollPane scrollPane = new JScrollPane(chatArea);
         DefaultCaret caret = (DefaultCaret)chatArea.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
@@ -88,7 +91,7 @@ public class Viewer implements Observer, DocumentListener {
     public void update() {
         if (client.isConnected()) {
             helpPanel.updateUserName(client.getUserName());
-            chatArea.setText(chatArea.getText() + formatMessage(client.getReceivedMessage()));
+            chatArea.setText(formatMessage(client.getReceivedMessage()));
         }
         else {
             frame.dispose();

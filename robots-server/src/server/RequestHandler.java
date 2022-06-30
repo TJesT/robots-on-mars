@@ -84,13 +84,15 @@ public class RequestHandler implements Runnable {
                     if (server.isLogging()) {
                         logger.info(userName.getName() + " login success");
                     }
-                    ListIterator<Message> iterator = server.getStoredMessages().listIterator(server.getStoredMessages().size());
+                    Message field = server.getField();
+                    sendMessage(field);
+//                    ListIterator<Message> iterator = server.getStoredMessages().listIterator(server.getStoredMessages().size());
                     if (server.isLogging()) {
                         logger.info("Sending stored messages");
                     }
-                    while (iterator.hasPrevious()) {
-                        sendMessage(iterator.previous());
-                    }
+//                    while (iterator.hasPrevious()) {
+//                        sendMessage(iterator.previous());
+//                    }
                 }
             }
 
