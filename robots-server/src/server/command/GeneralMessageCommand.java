@@ -20,6 +20,7 @@ public class GeneralMessageCommand implements IServerCommand {
             e.printStackTrace();
         }
 
-        requestHandler.sendMessage(server.getField());
+        server.broadcastMessage(server.getField());
+//        requestHandler.sendMessage(server.getField());
     }
 }

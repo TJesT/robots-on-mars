@@ -1,12 +1,9 @@
 package server;
 
 import controller.command.AbstractCommand;
-import controller.exception.CannotExecuteException;
 import controller.exception.CannotParseException;
 import controller.parser.CommandParser;
 import engine.Model;
-import engine.util.GameState;
-import network.chat.Chat;
 import network.chat.Message;
 import network.chat.MessageType;
 import network.exception.InvalidUserNameException;
@@ -19,7 +16,6 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,7 +36,6 @@ public class Server implements Runnable {
     private final Model model;
     private final CommandParser parser;
 
-    private final Chat chat;
     private final UserName serverName;
 
     public Server() {
@@ -62,7 +57,6 @@ public class Server implements Runnable {
         numOfShowingMessages = Integer.parseInt(properties.getProperty("NumShowingMessages"));
 
         clients = new ConcurrentHashMap<UserName, RequestHandler>();
-        chat = new Chat(numOfShowingMessages);
         model = new Model("model");
         parser = new CommandParser(model);
 
@@ -129,28 +123,14 @@ public class Server implements Runnable {
 
         return command;
     }
-//    private void addMessage(Message message) {
-//        synchronized (chat) {
-//            chat.addMessage(message);
-//        }
-//    }
 
     public void broadcastMessage(Message message) {
-//        addMessage(message);
         for (Map.Entry<UserName, RequestHandler> entry : clients.entrySet()) {
             entry.getValue().sendMessage(message);
         }
 
         logger.info("Broadcast message from " + message.getSenderName().getName());
     }
-
-//    public LinkedList<Message> getStoredMessages() {
-//        LinkedList<Message> messages;
-//        synchronized (chat) {
-//            messages = chat.getMessageList();
-//        }
-//        return messages;
-//    }
 
     public void close() {
         try {

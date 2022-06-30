@@ -106,8 +106,8 @@ public class Model {
         if (this.robots.containsKey(name)) return;
 
         AbstractRobot robot;
-//        Block block = this.surface.getStartCell();
-        Block block = this.commonBlock;
+        Block block = this.surface.getStartCell();
+//        Block block = this.commonBlock;
 
         switch (type) {
             case COLLECTOR:
